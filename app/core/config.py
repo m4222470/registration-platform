@@ -1,5 +1,5 @@
-from pydantic_settings import BaseSettings
-from typing import Optional
+from pydantic import BaseSettings
+from typing import List
 
 class Settings(BaseSettings):
     # إعدادات التطبيق
@@ -11,11 +11,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./registration.db"
     
     # إعدادات CORS للتوافق مع Netlify
-    CORS_ORIGINS: list = [
+    CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://localhost:8080",
-        "https://your-netlify-site.netlify.app",  # ضع رابط Netlify هنا
-        "*"  # للتطوير فقط
+        "https://your-netlify-site.netlify.app",
+        "*"
     ]
     
     # إعدادات الأمان
