@@ -1,3 +1,8 @@
+# app/crud.py
+"""
+عمليات CRUD الأساسية
+"""
+
 from sqlalchemy.orm import Session
 from app import models, schemas
 from datetime import datetime, date
@@ -6,6 +11,9 @@ import uuid
 class UserCRUD:
     @staticmethod
     def create_user(db: Session, user_data: schemas.UserCreate):
+        """
+        إنشاء مستخدم جديد
+        """
         # التحقق من وجود البريد مسبقاً
         existing_user = db.query(models.User).filter(
             models.User.email == user_data.email
@@ -37,17 +45,41 @@ class UserCRUD:
     
     @staticmethod
     def get_user(db: Session, user_id: int):
+        """
+        الحصول على مستخدم بواسطة المعرف
+        """
         return db.query(models.User).filter(models.User.id == user_id).first()
     
     @staticmethod
     def get_all_users(db: Session, skip: int = 0, limit: int = 100):
-        return db.query(models.User).offset(skip).limit(limit).all()
+        """
+        الحصول على جميع المستخدمين مع إمكانية الترقيم
+        """
+        return db.query(models.User).order_by(
+            models.User.created_at.desc()
+        ).offset(skip).limit(limit).all()
     
     @staticmethod
     def update_user_status(db: Session, user_id: int, status: str):
+        """
+        تحديث حالة المستخدم
+        """
         user = db.query(models.User).filter(models.User.id == user_id).first()
         if user:
             user.status = status
+            user.updated_at = datetime.now()
+            db.commit()
+            db.refresh(user)
+        return user
+    
+    @staticmethod
+    def delete_user(db: Session, user_id: int):
+        """
+        حذف مستخدم (حذف منطقي)
+        """
+        user = db.query(models.User).filter(models.User.id == user_id).first()
+        if user:
+            user.is_active = False
             user.updated_at = datetime.now()
             db.commit()
             db.refresh(user)
@@ -56,6 +88,9 @@ class UserCRUD:
 class StatsCRUD:
     @staticmethod
     def get_stats(db: Session):
+        """
+        الحصول على الإحصائيات الحالية
+        """
         stats = db.query(models.RegistrationStats).first()
         
         if not stats:
@@ -79,6 +114,9 @@ class StatsCRUD:
     @staticmethod
     def update_stats(db: Session, total_users: int = None, 
                      today_visits: int = None, countries_count: int = None):
+        """
+        تحديث الإحصائيات
+        """
         stats = db.query(models.RegistrationStats).first()
         
         if not stats:
