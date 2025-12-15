@@ -2,12 +2,12 @@ from pydantic import BaseModel, EmailStr, Field, validator
 from typing import Optional
 from datetime import datetime
 
-# نموذج التسجيل (مطابق للواجهة الأمامية)
+# نموذج التسجيل
 class UserCreate(BaseModel):
-    name: str = Field(..., min_length=3, max_length=100, description="الاسم الكامل")
-    email: EmailStr = Field(..., description="البريد الإلكتروني")
-    phone: Optional[str] = Field(None, pattern="^05\d{8}$", description="رقم الهاتف")
-    terms: bool = Field(..., description="الموافقة على الشروط")
+    name: str = Field(..., min_length=3, max_length=100)
+    email: EmailStr
+    phone: Optional[str] = Field(None, regex="^05\d{8}$")
+    terms: bool = Field(...)
     
     @validator('name')
     def validate_name(cls, v):
@@ -15,7 +15,7 @@ class UserCreate(BaseModel):
             raise ValueError('الاسم يجب أن يكون 3 أحرف على الأقل')
         return v.strip()
 
-# نموذج الرد من الخادم
+# نموذج الرد
 class UserResponse(BaseModel):
     id: int
     name: str
@@ -28,7 +28,7 @@ class UserResponse(BaseModel):
     timestamp: datetime
     
     class Config:
-        from_attributes = True
+        orm_mode = True  # تغيير from_attributes إلى orm_mode في Pydantic 1.x
 
 # نموذج الإحصائيات
 class StatsResponse(BaseModel):
